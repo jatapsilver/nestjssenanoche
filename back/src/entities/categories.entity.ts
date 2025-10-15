@@ -5,7 +5,7 @@ import {
   ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Products } from './products.entity';
+import { Product } from './products.entity';
 
 @Entity({ name: 'categories' })
 export class Categories {
@@ -20,7 +20,7 @@ export class Categories {
   })
   category: string;
 
-  @ManyToMany(() => Products, (products) => products.categories_id)
+  @ManyToMany(() => Product, (product) => product.categories_id)
   @JoinTable()
-  products_id: Products[];
+  product_id: Product[];
 }

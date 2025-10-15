@@ -11,4 +11,8 @@ export class UsersService {
   getUserNameByIdServices() {
     return this.userRepository.getUserNameByIdRepository();
   }
+
+  getUserByIdServices(id: string) {
+    return this.userRepository.getUserByIdRepository(id);
+  }
 }

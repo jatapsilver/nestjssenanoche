@@ -1,8 +1,15 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Categories } from './categories.entity';
+import { OrderDetail } from './orderDetail.entity';
 
 @Entity({ name: 'products' })
-export class Products {
+export class Product {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
@@ -45,6 +52,9 @@ export class Products {
   })
   createAt: Date;
 
-  @ManyToMany(() => Categories, (categories) => categories.products_id)
+  @ManyToMany(() => Categories, (categories) => categories.product_id)
   categories_id: Categories[];
+
+  @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.product)
+  orderDetail: OrderDetail[];
 }
