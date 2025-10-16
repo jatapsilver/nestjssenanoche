@@ -1,12 +1,36 @@
-import { Controller, Get, HttpCode, Param, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Response } from 'express';
+
+export interface IUser {
+  name: string;
+  email: string;
+}
+
+export interface IUserUpdate {
+  id: number;
+  name: string;
+  email: string;
+}
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
   @Get('getAllUsers')
-  getAllUser() {
+  getAllUser(@Query('name') name: string) {
+    if (name) {
+      return this.userService.getUserByNameService(name);
+    }
     return this.userService.getAllUserServices();
   }
 
@@ -35,5 +59,14 @@ export class UsersController {
   @Get('findALL')
   findAll(@Res() res: Response) {
     return res.status(201).json({ message: 'Usuarios encontrados' });
+  }
+  @Post('createUser')
+  postCreateUser(@Body() user: IUser) {
+    return this.userService.postCreateUserService(user);
+  }
+
+  @Put('updateUser')
+  putUpdateUser(@Body() user: IUserUpdate) {
+    return this.userService.putUpdateUserService(user);
   }
 }
