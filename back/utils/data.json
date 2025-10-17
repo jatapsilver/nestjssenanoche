@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Javier",
+    "lastName": "Plata",
+    "dni": "1012345678",
+    "email": "javierplata@gmail.com",
+    "phone": "3001234567",
+    "birthDate": "05-02-1992",
+    "username": "jatapsilver",
+    "password": "Sena1234*",
+    "roles": "Admin"
+  },
+  {
+    "name": "Alexander",
+    "lastName": "Plata",
+    "dni": "1012345678",
+    "email": "javierplata2@gmail.com",
+    "phone": "3001234567",
+    "birthDate": "05-02-1992",
+    "username": "jatapsilver2",
+    "password": "Sena1234*",
+    "roles": "Support"
+  }
+]
