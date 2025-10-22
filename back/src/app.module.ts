@@ -7,8 +7,7 @@ import { ProductsModule } from './products/products.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import typeorm from './config/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/users.entity';
-import { Credential } from './entities/credential.entity';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -20,10 +19,10 @@ import { Credential } from './entities/credential.entity';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('typeorm') ?? {},
     }),
-    TypeOrmModule.forFeature([User, Credential]),
     UsersModule,
     CredentialsModule,
     ProductsModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService, DataLoaderUsers],

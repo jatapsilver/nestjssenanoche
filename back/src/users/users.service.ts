@@ -17,9 +17,17 @@ export class UsersService {
     return this.userRepository.getUserNameByIdRepository();
   }
 
-  getUserByIdServices(id: string) {
-    console.log('aca tenemos en id en el servicio', id);
-    return this.userRepository.getUserByIdRepository(id);
+  async getUserByIdServices(uuid: string) {
+    const userExisting = await this.userRepository.getUserById(uuid);
+    if (!userExisting) {
+      throw new NotFoundException('Este Usuario No existe');
+    }
+    if (userExisting.credential_id.isActive === false) {
+      throw new ConflictException(
+        'Este usuario no esta activo comuniquese con el Administrador',
+      );
+    }
+    return this.userRepository.getUserByIdRepository(userExisting);
   }
 
   getUserByNameService(name: string) {

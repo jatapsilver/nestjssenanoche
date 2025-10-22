@@ -1,5 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUser, IUserUpdate } from './users.controller';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/entities/users.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersRepository {
@@ -20,6 +23,11 @@ export class UsersRepository {
       email: 'javierplata2@gmail.com',
     },
   ];
+
+  constructor(
+    @InjectRepository(User)
+    private readonly userDataBase: Repository<User>,
+  ) {}
   getAllUserRepository() {
     return this.users;
   }
@@ -28,12 +36,24 @@ export class UsersRepository {
     return 'este metodo retorna el nombre de un usuario por su id';
   }
 
-  getUserByIdRepository(id: string) {
-    const user = this.users.find((user) => user.id === Number(id));
-    if (!user) {
-      throw new NotFoundException('Este Usuario No existe');
-    }
-    return user;
+  getUserByIdRepository(userExisting: User) {
+    const { credential_id, orders, ...userProfile } = userExisting;
+
+    console.log(`Se envio la informacion del usuario: ${userProfile.name}`);
+    return {
+      ...userProfile,
+      username: credential_id.username,
+      rol: credential_id.roles,
+      isActive: credential_id.isActive,
+      orders: orders,
+    };
+  }
+
+  async getUserById(uuid: string) {
+    return await this.userDataBase.findOne({
+      where: { uuid: uuid },
+      relations: ['credential_id', 'orders'],
+    });
   }
 
   getUserByIdRepositoryTwo(id: number) {

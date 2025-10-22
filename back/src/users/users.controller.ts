@@ -5,6 +5,7 @@ import {
   Headers,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -41,9 +42,9 @@ export class UsersController {
     return this.userService.getAllUserServices();
   }
 
-  @Get('userById/:id')
-  getUserById(@Param('id') id: string) {
-    return this.userService.getUserByIdServices(id);
+  @Get('userById/:uuid')
+  getUserById(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.userService.getUserByIdServices(uuid);
   }
 
   @Get('getUserNameById')
