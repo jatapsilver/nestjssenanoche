@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IUser, IUserUpdate } from './users.controller';
+import { IUserUpdate } from './users.controller';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/users.entity';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './Dtos/createUser.dto';
+import { Credential } from 'src/entities/credential.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersRepository {
@@ -27,6 +30,8 @@ export class UsersRepository {
   constructor(
     @InjectRepository(User)
     private readonly userDataBase: Repository<User>,
+    @InjectRepository(Credential)
+    private readonly credentialDataBase: Repository<Credential>,
   ) {}
   getAllUserRepository() {
     return this.users;
@@ -68,16 +73,10 @@ export class UsersRepository {
     return users;
   }
 
-  getUserByEmail(email: string) {
-    return this.users.find((user) => user.email === email);
+  async getUserByEmail(email: string) {
+    return await this.userDataBase.findOne({ where: { email: email } });
   }
 
-  postCreateUserRepository(user: IUser) {
-    const id = this.users.length + 1;
-    const newUser = { id, ...user };
-    this.users.push(newUser);
-    return this.users;
-  }
   getUpdateUserRepository(
     userExisting: { id: number; name: string; email: string },
     user: IUserUpdate,
@@ -85,5 +84,32 @@ export class UsersRepository {
     userExisting.email = user.email;
     userExisting.name = user.name;
     return this.users;
+  }
+
+  async postCreateUserRepository(createUserDto: CreateUserDto) {
+    const hashedPassword: string = await bcrypt.hash(
+      createUserDto.password,
+      10,
+    );
+
+    const newCredential = this.credentialDataBase.create({
+      username: createUserDto.username,
+      password: hashedPassword,
+    });
+    await this.credentialDataBase.save(newCredential);
+    const newUser = this.userDataBase.create({
+      name: createUserDto.name,
+      lastName: createUserDto.lastname,
+      email: createUserDto.email,
+      dni: createUserDto.dni,
+      phone: createUserDto.phone,
+      birthDate: createUserDto.birthDate,
+      credential_id: newCredential,
+    });
+    await this.userDataBase.save(newUser);
+    console.log(
+      `se creo un nuevo usuario son username: ${newUser.credential_id.username}`,
+    );
+    return `Usuario ${newUser.name} fue creado en la base de datos`;
   }
 }
