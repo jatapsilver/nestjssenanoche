@@ -13,6 +13,7 @@ export class CredentialsRepository {
   async getUserByUsername(username: string) {
     return await this.credentialDataBase.findOne({
       where: { username: username },
+      relations: ['user_id'],
     });
   }
 }
