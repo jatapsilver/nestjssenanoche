@@ -17,6 +17,7 @@ import { UsersService } from './users.service';
 import { Response } from 'express';
 import { UserAuthGuard } from 'src/guards/user-auth.guard';
 import { CreateUserDto } from './Dtos/createUser.dto';
+import { AuthGuard } from 'src/auth/Guards/auth.guard';
 
 export interface IUser {
   name: string;
@@ -32,6 +33,8 @@ export interface IUserUpdate {
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
+
+  @UseGuards(AuthGuard)
   @Get('getAllUsers')
   getAllUser(@Query('name') name: string) {
     if (name) {
@@ -42,6 +45,7 @@ export class UsersController {
 
   @Get('userById/:uuid')
   getUserById(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    console.log('Este es el uuid', uuid);
     return this.userService.getUserByIdServices(uuid);
   }
 
