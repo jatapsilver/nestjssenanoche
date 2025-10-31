@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { IUserUpdate } from './users.controller';
 import { CreateUserDto } from './Dtos/createUser.dto';
 import { CredentialsRepository } from 'src/credentials/credentials.repository';
 
@@ -14,31 +13,43 @@ export class UsersService {
     private readonly userRepository: UsersRepository,
     private readonly credentialRepository: CredentialsRepository,
   ) {}
+  //servicio para buscar todos los usuarios
   getAllUserServices() {
     return this.userRepository.getAllUserRepository();
   }
 
-  getUserNameByIdServices() {
-    return this.userRepository.getUserNameByIdRepository();
-  }
-
+  //servicio para obtener un usuario por su id
   async getUserByIdServices(uuid: string) {
     const userExisting = await this.userRepository.getUserById(uuid);
     if (!userExisting) {
       throw new NotFoundException('Este Usuario No existe');
     }
-    if (userExisting.credential_id.isActive === false) {
-      throw new ConflictException(
-        'Este usuario no esta activo comuniquese con el Administrador',
-      );
+    return userExisting;
+  }
+
+  //servicio para obtener el perfil del usuario
+  async getUserProfileServices(uuid: string) {
+    const userExisting = await this.userRepository.getUserById(uuid);
+    if (!userExisting) {
+      throw new NotFoundException('Este usuario no existe');
     }
-    return this.userRepository.getUserByIdRepository(userExisting);
+    if (userExisting.credential_id.isActive === false) {
+      throw new ConflictException('Este usuario no se encuentra activo');
+    }
+    return this.userRepository.getUserProfileRepository(userExisting);
   }
 
-  getUserByNameService(name: string) {
-    return this.userRepository.getUserByNameRepository(name);
+  //servicio para obtener los usuarios por nombre
+  async getUserByNameService(name: string) {
+    const usersExisting =
+      await this.userRepository.getUserByNameRepository(name);
+    if (usersExisting.length === 0) {
+      throw new NotFoundException('No existen usuarios con este nombre');
+    }
+    return usersExisting;
   }
 
+  //servicio para crear un usuario
   async postCreateUserService(createUserDto: CreateUserDto) {
     const emailExisting = await this.userRepository.getUserByEmail(
       createUserDto.email,
@@ -56,30 +67,15 @@ export class UsersService {
     return this.userRepository.postCreateUserRepository(createUserDto);
   }
 
-  // postCreateUserService(user: IUser) {
-  //   if (!user.email || !user.name) {
-  //     throw new ConflictException(
-  //       'El correo electronico y el nombre son obligatorios',
-  //     );
-  //   }
-  //   const userExisting = this.userRepository.getUserByEmail(user.email);
-  //   if (userExisting) {
-  //     throw new ConflictException('Este Correo ya se encuentra registrado');
-  //   }
-  //   return this.userRepository.postCreateUserRepository(user);
-  // }
-
-  putUpdateUserService(user: IUserUpdate) {
-    const { id, name, email } = user;
-    if (!email || !name) {
-      throw new ConflictException(
-        'El correo electronico y el nombre son obligatorios',
-      );
-    }
-    const userExisting = this.userRepository.getUserByIdRepositoryTwo(id);
+  //servicio para un soft delete de un usuario
+  async softDeleteUserServices(uuid: string) {
+    const userExisting = await this.userRepository.getUserById(uuid);
     if (!userExisting) {
-      throw new NotFoundException('Este Usuario no existe');
+      throw new NotFoundException('Este usuario no existe');
     }
-    return this.userRepository.getUpdateUserRepository(userExisting, user);
+    if (userExisting.credential_id.isActive === false) {
+      throw new ConflictException('Este usuario ya esta desactivado');
+    }
+    return this.userRepository.softDeleteUserRepository(userExisting);
   }
 }

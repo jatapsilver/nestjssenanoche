@@ -1,40 +1,28 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  Headers,
-  HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
-  Put,
   Query,
-  Res,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Response } from 'express';
-import { UserAuthGuard } from 'src/guards/user-auth.guard';
 import { CreateUserDto } from './Dtos/createUser.dto';
 import { AuthGuard } from 'src/auth/Guards/auth.guard';
-
-export interface IUser {
-  name: string;
-  email: string;
-}
-
-export interface IUserUpdate {
-  id: number;
-  name: string;
-  email: string;
-}
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesEnum } from 'src/enums/roles.enum';
+import { RolesGuard } from 'src/auth/Guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
-  @UseGuards(AuthGuard)
+  //Ruta para obtener todos los usuarios y por query obtener usuarios por nombre
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   @Get('getAllUsers')
   getAllUser(@Query('name') name: string) {
     if (name) {
@@ -43,60 +31,32 @@ export class UsersController {
     return this.userService.getAllUserServices();
   }
 
+  //ruta para obtener un usuario por su uuid
   @Get('userById/:uuid')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN)
   getUserById(@Param('uuid', ParseUUIDPipe) uuid: string) {
-    console.log('Este es el uuid', uuid);
     return this.userService.getUserByIdServices(uuid);
   }
 
-  @Get('getUserNameById')
-  getUserNameById() {
-    return this.userService.getUserNameByIdServices();
+  //ruta para obtener el perfil de un usuario
+  @Get('profile/:uuid')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.SUPPORT, RolesEnum.USER)
+  getUserProfile(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.userService.getUserProfileServices(uuid);
   }
 
-  @HttpCode(418)
-  @Get('coffees')
-  makeCoffee() {
-    return 'No puedo preparar cafe por que soy una tetera';
-  }
-
-  @UseGuards(UserAuthGuard)
-  @HttpCode(201)
-  @Get('createdUser')
-  createdUser() {
-    return 'Usuario creado con exito';
-  }
-
-  @UseGuards(UserAuthGuard)
-  @Get('findALL')
-  findAll(@Res() res: Response) {
-    return res.status(201).json({ message: 'Usuarios encontrados' });
-  }
-
-  @Get('profile')
-  getUserProfile(@Headers('token') token: string) {
-    if (token !== '12345') {
-      throw new UnauthorizedException();
-    }
-    return `Soy el perfil del usuario con token: ${token}`;
-  }
-
+  //ruta para crear un usuario
   @Post('createUser')
   postCreateUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.postCreateUserService(createUserDto);
   }
-
-  // @Post('createUser')
-  // @UseInterceptors(DateAdderInterceptor)
-  // postCreateUser(@Body() user: IUser, @Req() request) {
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  //   const modifiedUser = { ...user, createAt: request.now };
-  //   console.log('Usuario Modificado:', modifiedUser);
-  //   return this.userService.postCreateUserService(modifiedUser);
-  // }
-
-  @Put('updateUser')
-  putUpdateUser(@Body() user: IUserUpdate) {
-    return this.userService.putUpdateUserService(user);
+  // ruta para aplicar soft delete a un usuario
+  @Delete('deleteUser/:uuid')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.SUPPORT, RolesEnum.USER)
+  softDeleteUser(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.userService.softDeleteUserServices(uuid);
   }
 }

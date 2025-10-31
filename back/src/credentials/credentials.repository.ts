@@ -10,6 +10,7 @@ export class CredentialsRepository {
     private readonly credentialDataBase: Repository<Credential>,
   ) {}
 
+  //metodo para obtener la credencial de un usuario por su username
   async getUserByUsername(username: string) {
     return await this.credentialDataBase.findOne({
       where: { username: username },

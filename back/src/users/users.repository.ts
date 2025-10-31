@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { IUserUpdate } from './users.controller';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/users.entity';
 import { Repository } from 'typeorm';
@@ -9,39 +8,19 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersRepository {
-  private users = [
-    {
-      id: 1,
-      name: 'javier plata',
-      email: 'javierplata@gmail.com',
-    },
-    {
-      id: 2,
-      name: 'alexander rueda',
-      email: 'alexanderrueda@gail.com',
-    },
-    {
-      id: 3,
-      name: 'javier plata',
-      email: 'javierplata2@gmail.com',
-    },
-  ];
-
   constructor(
     @InjectRepository(User)
     private readonly userDataBase: Repository<User>,
     @InjectRepository(Credential)
     private readonly credentialDataBase: Repository<Credential>,
   ) {}
-  getAllUserRepository() {
-    return this.users;
+  //metodo para obtener todos los usuarios
+  async getAllUserRepository() {
+    return this.userDataBase.find();
   }
 
-  getUserNameByIdRepository() {
-    return 'este metodo retorna el nombre de un usuario por su id';
-  }
-
-  getUserByIdRepository(userExisting: User) {
+  //metodo para obtener el perfil de un usuario
+  getUserProfileRepository(userExisting: User) {
     const { credential_id, orders, ...userProfile } = userExisting;
 
     console.log(`Se envio la informacion del usuario: ${userProfile.name}`);
@@ -54,6 +33,7 @@ export class UsersRepository {
     };
   }
 
+  //metodo para obtener un usuario por su id
   async getUserById(uuid: string) {
     return await this.userDataBase.findOne({
       where: { uuid: uuid },
@@ -61,31 +41,19 @@ export class UsersRepository {
     });
   }
 
-  getUserByIdRepositoryTwo(id: number) {
-    return this.users.find((user) => user.id === id);
-  }
-
-  getUserByNameRepository(name: string) {
-    const users = this.users.filter((user) => user.name === name);
-    if (users.length <= 0) {
-      throw new NotFoundException('No existen usuarios con ese nombre');
-    }
+  //metodo para obtener usuarios por el nombre
+  async getUserByNameRepository(name: string) {
+    const users = this.userDataBase.find({
+      where: { name: name },
+    });
     return users;
   }
-
+  //metodo para obtener un usuario por su correo electronico
   async getUserByEmail(email: string) {
     return await this.userDataBase.findOne({ where: { email: email } });
   }
 
-  getUpdateUserRepository(
-    userExisting: { id: number; name: string; email: string },
-    user: IUserUpdate,
-  ) {
-    userExisting.email = user.email;
-    userExisting.name = user.name;
-    return this.users;
-  }
-
+  //metodo para crear un usuario
   async postCreateUserRepository(createUserDto: CreateUserDto) {
     const hashedPassword: string = await bcrypt.hash(
       createUserDto.password,
@@ -111,5 +79,12 @@ export class UsersRepository {
       `se creo un nuevo usuario son username: ${newUser.credential_id.username}`,
     );
     return `Usuario ${newUser.name} fue creado en la base de datos`;
+  }
+
+  //metodo para soft delete de un usuario
+  async softDeleteUserRepository(userExisting: User) {
+    userExisting.credential_id.isActive = false;
+    await this.userDataBase.save(userExisting);
+    return { message: `El usuario ${userExisting.name} ha sido desactivado` };
   }
 }
