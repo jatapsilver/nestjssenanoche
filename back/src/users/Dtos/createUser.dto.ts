@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -11,6 +12,10 @@ import {
 import { MatchPassword } from 'src/decorators/matchPassword.decorator';
 
 export class CreateUserDto {
+  @ApiProperty({
+    description: 'Debe ser el nombre del usuario',
+    example: 'John',
+  })
   @IsNotEmpty({
     message: 'El nombre del usuario es requerido',
   })
@@ -25,6 +30,10 @@ export class CreateUserDto {
   })
   name: string;
 
+  @ApiProperty({
+    description: 'Debe ser el apellido del usuario',
+    example: 'Doe',
+  })
   @IsNotEmpty({
     message: 'El apellido del usuario es requerido',
   })
@@ -39,6 +48,10 @@ export class CreateUserDto {
   })
   lastname: string;
 
+  @ApiProperty({
+    description: 'Debe ser el la identifacion del usuario',
+    example: '123456789',
+  })
   @IsNotEmpty({
     message: 'La identificacion del usuario es requerida',
   })
@@ -48,6 +61,10 @@ export class CreateUserDto {
   @IsNumberString({}, { message: 'El dni sólo puede contener números' })
   dni: string;
 
+  @ApiProperty({
+    description: 'Debe ser el email del usuario',
+    example: 'example@gmail.com',
+  })
   @IsEmail(
     {},
     {
@@ -56,6 +73,10 @@ export class CreateUserDto {
   )
   email: string;
 
+  @ApiProperty({
+    description: 'Debe ser el telefono de usuario',
+    example: '3001234567',
+  })
   @IsNotEmpty({
     message: 'El numero de celular del usuario es requerido',
   })
@@ -71,6 +92,10 @@ export class CreateUserDto {
   })
   phone: string;
 
+  @ApiProperty({
+    description: 'Debe ser la fecha de nacimiento del usuario',
+    example: '05/02/1992',
+  })
   @IsNotEmpty({
     message: 'La fecha de nacimiento del usuario es requerida',
   })
@@ -83,6 +108,10 @@ export class CreateUserDto {
   })
   birthDate: string;
 
+  @ApiProperty({
+    description: 'Debe ser el username del usuario',
+    example: 'jatapsilver',
+  })
   @IsNotEmpty({
     message: 'el username del usuario es requerida',
   })
@@ -97,6 +126,10 @@ export class CreateUserDto {
   })
   username: string;
 
+  @ApiProperty({
+    description: 'Debe ser el passsword del usuario',
+    example: 'Sena1234*',
+  })
   @IsNotEmpty({
     message: 'el password del usuario es requerida',
   })
@@ -112,6 +145,10 @@ export class CreateUserDto {
   )
   password: string;
 
+  @ApiProperty({
+    description: 'Debe ser la confirmacion del password',
+    example: 'Sena1234*',
+  })
   @Validate(MatchPassword, ['password'])
   confirmPassword: string;
 }

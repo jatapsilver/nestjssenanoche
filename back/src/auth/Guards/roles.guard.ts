@@ -18,13 +18,11 @@ export class RolesGuard implements CanActivate {
       'roles',
       [context.getHandler(), context.getClass()],
     );
-    console.log('Roles requeridos para esta ruta:', requiredRoles);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const request = context.switchToHttp().getRequest();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unused-vars
     const payload = request.user;
-    console.log('Payload del usuario en el guard de roles:', payload);
 
     const hasRole = () =>
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -33,7 +31,6 @@ export class RolesGuard implements CanActivate {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const validate = payload && payload.role && hasRole();
 
-    console.log('Validacion de roles en el guard:', validate);
     if (!validate) {
       throw new ForbiddenException(
         'No tienes permisos para acceder a este contenido',

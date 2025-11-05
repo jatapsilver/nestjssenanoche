@@ -16,7 +16,7 @@ export class UsersRepository {
   ) {}
   //metodo para obtener todos los usuarios
   async getAllUserRepository() {
-    return this.userDataBase.find();
+    return await this.userDataBase.find();
   }
 
   //metodo para obtener el perfil de un usuario
@@ -84,7 +84,7 @@ export class UsersRepository {
   //metodo para soft delete de un usuario
   async softDeleteUserRepository(userExisting: User) {
     userExisting.credential_id.isActive = false;
-    await this.userDataBase.save(userExisting);
+    await this.credentialDataBase.save(userExisting.credential_id);
     return { message: `El usuario ${userExisting.name} ha sido desactivado` };
   }
 }
