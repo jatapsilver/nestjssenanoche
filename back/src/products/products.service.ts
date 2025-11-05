@@ -1,36 +1,47 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ProductsRepository } from './products.repository';
+import { ProductRepository } from './products.repository';
 import { CreateProductDto } from './Dtos/createProduct.dto';
-import { CategoriesRepository } from 'src/categories/categories.repository';
+import { UpdateProductDto } from './Dtos/updateProduct.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    private readonly productsRepository: ProductsRepository,
-    private readonly categoriesRepository: CategoriesRepository,
-  ) {}
-
+  constructor(private readonly productRepository: ProductRepository) {}
   //servicio para obtener todos los productos
-  getAllProductsServices() {
-    return this.productsRepository.getAllProductsRepository();
+  async getAllProductsService() {
+    return await this.productRepository.getAllProductsRepository();
+  }
+
+  //servicio para eliminar un producto
+  async deleteProductsService(uuid: string) {
+    const productExisting = await this.productRepository.getProductById(uuid);
+    if (!productExisting) {
+      throw new NotFoundException('Este producto no existe');
+    }
+
+    if (productExisting.isActive === false) {
+      throw new BadRequestException('Este producto esta inactivo');
+    }
+
+    return this.productRepository.deleteProductsRepository(productExisting);
   }
 
   //servicio para crear un nuevo producto
-  async postCreateProductService(createProductDto: CreateProductDto) {
-    const nameExisting = await this.productsRepository.getProductByName(
+  async createProductService(createProductDto: CreateProductDto) {
+    const nameExists = await this.productRepository.getProductByName(
       createProductDto.name,
     );
-    if (nameExisting) {
-      throw new ConflictException('Ya existe un producto con este nombre');
-    }
-    if (createProductDto.price < 0) {
+    if (nameExists) {
       throw new BadRequestException(
-        'El precio del producto tiene que ser mayor a cero',
+        'Ya existe un producto registrado con este nombre',
+      );
+    }
+    if (createProductDto.price <= 0) {
+      throw new BadRequestException(
+        'El precio del producto debe ser mayor a cero',
       );
     }
     if (createProductDto.stock < 0) {
@@ -38,15 +49,42 @@ export class ProductsService {
         'El stock del producto no puede ser negativo',
       );
     }
-    const categoryExisting = await this.categoriesRepository.getCategoryById(
-      createProductDto.categoriesId,
-    );
-    if (!categoryExisting) {
-      throw new NotFoundException('Esta categoria no existe');
-    }
-    return this.productsRepository.postCreateProductRepository(
+    return await this.productRepository.createProductRepository(
       createProductDto,
-      categoryExisting,
+    );
+  }
+
+  //servicio para actualizar un producto
+  async updateProductService(uuid: string, updateProductDto: UpdateProductDto) {
+    const productExisting = await this.productRepository.getProductById(uuid);
+    if (!productExisting) {
+      throw new NotFoundException('Este producto no existe');
+    }
+
+    if (updateProductDto.price !== undefined && updateProductDto.price <= 0) {
+      throw new BadRequestException(
+        'El precio del producto debe ser mayor a cero',
+      );
+    }
+    if (updateProductDto.stock !== undefined && updateProductDto.stock < 0) {
+      throw new BadRequestException(
+        'El stock del producto no puede ser negativo',
+      );
+    }
+
+    if (updateProductDto.name) {
+      const nameExists = await this.productRepository.getProductByName(
+        updateProductDto.name,
+      );
+      if (nameExists && nameExists.uuid !== uuid) {
+        throw new BadRequestException(
+          'Ya existe un producto registrado con este nombre',
+        );
+      }
+    }
+    return await this.productRepository.updateProductRepository(
+      productExisting,
+      updateProductDto,
     );
   }
 }

@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './Dtos/createUser.dto';
 import { Credential } from 'src/entities/credential.entity';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './Dtos/updateUser.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -79,6 +80,39 @@ export class UsersRepository {
       `se creo un nuevo usuario son username: ${newUser.credential_id.username}`,
     );
     return `Usuario ${newUser.name} fue creado en la base de datos`;
+  }
+
+  //metodo para actualizar un usuario
+  async putUpdateUserRepository(
+    userExisting: User,
+    updateUserDto: UpdateUserDto,
+  ) {
+    if (updateUserDto.name) {
+      userExisting.name = updateUserDto.name;
+    }
+
+    if (updateUserDto.lastname) {
+      userExisting.lastName = updateUserDto.lastname;
+    }
+
+    if (updateUserDto.email) {
+      userExisting.email = updateUserDto.email;
+    }
+
+    if (updateUserDto.phone) {
+      userExisting.phone = updateUserDto.phone;
+    }
+
+    if (updateUserDto.dni) {
+      userExisting.dni = updateUserDto.dni;
+    }
+
+    if (updateUserDto.birthDate) {
+      userExisting.birthDate = new Date(updateUserDto.birthDate);
+    }
+
+    await this.userDataBase.save(userExisting);
+    return { message: 'Usuario actualizado exitosamente' };
   }
 
   //metodo para soft delete de un usuario

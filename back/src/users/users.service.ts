@@ -6,6 +6,7 @@ import {
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from './Dtos/createUser.dto';
 import { CredentialsRepository } from 'src/credentials/credentials.repository';
+import { UpdateUserDto } from './Dtos/updateUser.dto';
 
 @Injectable()
 export class UsersService {
@@ -65,6 +66,43 @@ export class UsersService {
       throw new ConflictException('Este username ya esta en uso');
     }
     return this.userRepository.postCreateUserRepository(createUserDto);
+  }
+
+  //servicio para actualizar un usuario
+  async putUpdateUserService(updateUserDto: UpdateUserDto) {
+    const userExisting = await this.userRepository.getUserById(
+      updateUserDto.uuid,
+    );
+    if (!userExisting) {
+      throw new NotFoundException('No existe el usuario');
+    }
+    if (userExisting.credential_id.isActive === false) {
+      throw new ConflictException('Este usuario no esta activo');
+    }
+    if (updateUserDto.email) {
+      const emailExisting = await this.userRepository.getUserByEmail(
+        updateUserDto.email,
+      );
+      if (emailExisting) {
+        throw new ConflictException('Este correo ya se encuentra registrado');
+      }
+    }
+
+    if (updateUserDto.username) {
+      const usernameExisting =
+        await this.credentialRepository.getUserByUsername(
+          updateUserDto.username,
+        );
+      if (usernameExisting) {
+        throw new ConflictException(
+          'Este nombre de usuario ya se encuentra en uso',
+        );
+      }
+    }
+    return this.userRepository.putUpdateUserRepository(
+      userExisting,
+      updateUserDto,
+    );
   }
 
   //servicio para un soft delete de un usuario

@@ -1,63 +1,75 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsInt,
   IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
   IsString,
+  IsUrl,
   IsUUID,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 
 export class CreateProductDto {
-  @IsNotEmpty({
-    message: 'El nombre del usuario es requerido',
+  @ApiProperty({
+    description: 'Nombre del producto',
+    example: 'Laptop HP Pavilion',
+    maxLength: 100,
+    minLength: 3,
   })
-  @IsString({
-    message: 'El nombre del usuario debe ser una cadena de caracteres',
-  })
-  @MinLength(3, {
-    message: 'El nombre del usuario debe tener al menos 3 caracteres',
-  })
-  @MaxLength(25, {
-    message: 'El nombre del usuario no debe tener mas de 25 caracteres',
-  })
+  @IsNotEmpty({ message: 'El nombre del producto es requerido' })
+  @IsString({ message: 'El nombre debe ser una cadena de caracteres' })
+  @MinLength(3, { message: 'El nombre debe tener mínimo 3 caracteres' })
+  @MaxLength(100, { message: 'El nombre no puede tener más de 100 caracteres' })
   name: string;
 
-  @IsNotEmpty({
-    message: 'La Descripcion del producto es requerida',
+  @ApiProperty({
+    description: 'Descripción detallada del producto',
+    example:
+      'Laptop de alto rendimiento con procesador Intel Core i7, 16GB RAM y 512GB SSD',
+    minLength: 10,
   })
-  @IsString({
-    message: 'La Descripcion del producto debe ser una cadena caracteres',
-  })
-  @MinLength(10, {
-    message: 'La Descripcion del producto debe tener al menos 10 caracteres',
-  })
-  @MaxLength(50, {
-    message: 'La Descripcion del producto no debe tener mas de 50 caracteres',
-  })
+  @IsNotEmpty({ message: 'La descripción es requerida' })
+  @IsString({ message: 'La descripción debe ser una cadena de caracteres' })
+  @MinLength(10, { message: 'La descripción debe tener mínimo 10 caracteres' })
   description: string;
 
-  @IsNotEmpty({
-    message: 'El precio del producto es requerido',
+  @ApiProperty({
+    description: 'Precio del producto',
+    example: 1299.99,
+    minimum: 0.01,
   })
-  @IsInt({
-    message: 'El precio del producto debe ser un entero',
-  })
+  @IsNotEmpty({ message: 'El precio es requerido' })
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'El precio debe ser un número con máximo 2 decimales' },
+  )
+  @IsPositive({ message: 'El precio debe ser un número positivo' })
   price: number;
-  @IsNotEmpty({
-    message: 'El stock del producto es requerido',
+
+  @ApiProperty({
+    description: 'Cantidad de productos disponibles en stock',
+    example: 50,
+    minimum: 0,
   })
-  @IsInt({
-    message: 'El stock del producto debe ser un entero',
-  })
+  @IsNotEmpty({ message: 'El stock es requerido' })
+  @IsInt({ message: 'El stock debe ser un número entero' })
+  @Min(0, { message: 'El stock no puede ser negativo' })
   stock: number;
 
-  @IsNotEmpty({
-    message: 'El nombre del usuario es requerido',
+  @ApiProperty({
+    description: 'URL de la imagen del producto',
+    example: 'https://example.com/images/laptop.jpg',
+    required: false,
+    default: 'https://cdn-icons-png.flaticon.com/512/74/74472.png',
   })
-  @IsString({
-    message: 'El nombre del usuario debe ser una cadena de caracteres',
-  })
-  imgUrl: string;
+  @IsOptional()
+  @IsUrl({}, { message: 'La URL de la imagen debe ser válida' })
+  @IsString({ message: 'La URL debe ser una cadena de caracteres' })
+  imgUrl?: string;
 
   @IsUUID('4', {
     message: 'Debe ser un UUID',

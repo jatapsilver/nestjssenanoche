@@ -11,6 +11,8 @@ import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CategoriesModule } from './categories/categories.module';
+import { OrdersModule } from './orders/orders.module';
+import { OrderDetailModule } from './order_detail/order_detail.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { CategoriesModule } from './categories/categories.module';
     SeedModule,
     AuthModule,
     CategoriesModule,
+    OrdersModule,
+    OrderDetailModule,
   ],
   controllers: [AppController],
   providers: [AppService, DataLoaderUsers],

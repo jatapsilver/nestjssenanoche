@@ -1,43 +1,61 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Categories } from 'src/entities/categories.entity';
-import { Product } from 'src/entities/products.entity';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './Dtos/createProduct.dto';
+import { UpdateProductDto } from './Dtos/updateProduct.dto';
+import { Product } from 'src/entities/products.entity';
 
 @Injectable()
-export class ProductsRepository {
+export class ProductRepository {
   constructor(
     @InjectRepository(Product)
-    private readonly productDataBase: Repository<Product>,
+    private readonly productsDataBase: Repository<Product>,
   ) {}
   //metodo para obtener todos los productos
   async getAllProductsRepository() {
-    return await this.productDataBase.find();
+    return await this.productsDataBase.find();
   }
 
-  //metodo para obtener un producto por su nombre
+  //metodo para obtener el producto por su id
+  async getProductById(uuid: string) {
+    return await this.productsDataBase.findOne({ where: { uuid: uuid } });
+  }
+
+  //metodo para hacer un softDelete de un producto
+  async deleteProductsRepository(productExisting: Product) {
+    productExisting.isActive = false;
+    await this.productsDataBase.save(productExisting);
+    return {
+      message: `Este Producto ${productExisting.name} ha sido eliminado`,
+    };
+  }
+
+  //metodo para buscar un producto por su nombre
   async getProductByName(name: string) {
-    return await this.productDataBase.findOne({
-      where: { name: name },
-    });
+    return await this.productsDataBase.findOne({ where: { name: name } });
   }
 
   //metodo para crear un nuevo producto
-  async postCreateProductRepository(
-    createProductDto: CreateProductDto,
-    categoryExisting: Categories[],
-  ) {
-    const newProduct = this.productDataBase.create({
-      name: createProductDto.name,
-      description: createProductDto.description,
-      price: createProductDto.price,
-      stock: createProductDto.stock,
-      imgUrl: createProductDto.imgUrl,
-      categories_id: categoryExisting,
+  async createProductRepository(createProductDto: CreateProductDto) {
+    const newProduct = this.productsDataBase.create({
+      ...createProductDto,
+      createAt: new Date(),
     });
-    await this.productDataBase.save(newProduct);
-    console.log(`Se creo un nuevo producto con el nombre ${newProduct.name}`);
-    return `Nuevo producto creado ${newProduct.name}`;
+    await this.productsDataBase.save(newProduct);
+    return newProduct;
+  }
+  //metodo para actualizar un producto
+  async updateProductRepository(
+    productExisting: Product,
+    updateProductDto: UpdateProductDto,
+  ) {
+    productExisting.name = updateProductDto.name || productExisting.name;
+    productExisting.description =
+      updateProductDto.description || productExisting.description;
+    productExisting.price = updateProductDto.price || productExisting.price;
+    productExisting.stock = updateProductDto.stock || productExisting.stock;
+
+    await this.productsDataBase.save(productExisting);
+    return productExisting;
   }
 }

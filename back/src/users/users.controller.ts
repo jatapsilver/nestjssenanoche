@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { UpdateUserDto } from './Dtos/updateUser.dto';
 
 @ApiTags('Usuarios')
 @Controller('users')
@@ -95,6 +97,21 @@ export class UsersController {
   postCreateUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.postCreateUserService(createUserDto);
   }
+
+  // Endpoint para actualizar un usuario
+
+  @ApiOperation({ summary: 'Actualizar un usuario' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario actualizado exitosamente.',
+  })
+  @ApiBearerAuth()
+  @Put('updateUser')
+  @UseGuards(AuthGuard)
+  putUpdateUser(@Body() updateUserDto: UpdateUserDto) {
+    return this.userService.putUpdateUserService(updateUserDto);
+  }
+
   // ruta para aplicar soft delete a un usuario
   @ApiOperation({
     summary: 'Esta ruta ejecuta un softDelete para el usuario',

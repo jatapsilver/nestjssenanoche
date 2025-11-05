@@ -13,8 +13,10 @@ import { MatchPassword } from 'src/decorators/matchPassword.decorator';
 
 export class CreateUserDto {
   @ApiProperty({
-    description: 'Debe ser el nombre del usuario',
-    example: 'John',
+    description: 'Nombre del usuario',
+    example: 'Juan',
+    minLength: 3,
+    maxLength: 25,
   })
   @IsNotEmpty({
     message: 'El nombre del usuario es requerido',
@@ -31,8 +33,10 @@ export class CreateUserDto {
   name: string;
 
   @ApiProperty({
-    description: 'Debe ser el apellido del usuario',
-    example: 'Doe',
+    description: 'Apellido del usuario',
+    example: 'Pérez',
+    minLength: 3,
+    maxLength: 25,
   })
   @IsNotEmpty({
     message: 'El apellido del usuario es requerido',
@@ -62,8 +66,8 @@ export class CreateUserDto {
   dni: string;
 
   @ApiProperty({
-    description: 'Debe ser el email del usuario',
-    example: 'example@gmail.com',
+    description: 'Correo electrónico del usuario',
+    example: 'usuario@example.com',
   })
   @IsEmail(
     {},
@@ -109,8 +113,8 @@ export class CreateUserDto {
   birthDate: string;
 
   @ApiProperty({
-    description: 'Debe ser el username del usuario',
-    example: 'jatapsilver',
+    description: 'Nombre de usuario para autenticación',
+    example: 'juan.perez',
   })
   @IsNotEmpty({
     message: 'el username del usuario es requerida',
@@ -127,8 +131,9 @@ export class CreateUserDto {
   username: string;
 
   @ApiProperty({
-    description: 'Debe ser el passsword del usuario',
-    example: 'Sena1234*',
+    description:
+      'Contraseña del usuario (mínimo 8 caracteres, debe incluir mayúsculas, minúsculas, números y caracteres especiales)',
+    example: 'Password123!',
   })
   @IsNotEmpty({
     message: 'el password del usuario es requerida',
@@ -146,8 +151,9 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
-    description: 'Debe ser la confirmacion del password',
-    example: 'Sena1234*',
+    description:
+      'Confirmación de la contraseña (debe coincidir con el campo password)',
+    example: 'Password123!',
   })
   @Validate(MatchPassword, ['password'])
   confirmPassword: string;
