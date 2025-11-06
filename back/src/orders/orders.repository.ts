@@ -22,7 +22,7 @@ export class OrdersRepository {
   //metodo para obtener todas las órdenes
   getAllOrdersRepository() {
     return this.ordersDataBase.find({
-      relations: ['order_detail', 'user', 'order_detail.products'],
+      relations: ['orderDetail', 'user', 'orderDetail.product'],
     });
   }
 
@@ -49,6 +49,7 @@ export class OrdersRepository {
     const newOrder = this.ordersDataBase.create({
       addressDelivery: createOrderDto.addressDelivery,
       user: user,
+      total: 0,
     });
     const savedOrder = await this.ordersDataBase.save(newOrder);
 
@@ -94,6 +95,14 @@ export class OrdersRepository {
 
       const savedOrderDetail = await this.orderDetailDataBase.save(orderDetail);
       orderDetails.push(savedOrderDetail);
+
+      const totalOrder = orderDetails.reduce(
+        (acc, detail) => acc + Number(detail.subTotal) + Number(detail.iva),
+        0,
+      );
+
+      newOrder.total = totalOrder;
+      await this.ordersDataBase.save(newOrder);
 
       // Actualizar el stock del producto
       product.stock -= cantidad;

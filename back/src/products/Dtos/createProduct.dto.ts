@@ -71,6 +71,9 @@ export class CreateProductDto {
   @IsString({ message: 'La URL debe ser una cadena de caracteres' })
   imgUrl?: string;
 
+  @ApiProperty({
+    description: 'Debe ser el UUID de la categoria',
+  })
   @IsUUID('4', {
     message: 'Debe ser un UUID',
   })

@@ -20,6 +20,12 @@ export class Categories {
   })
   category: string;
 
+  @Column({
+    type: 'boolean',
+    default: true,
+  })
+  isActive: boolean;
+
   @ManyToMany(() => Product, (product) => product.categories_id)
   @JoinTable()
   product_id: Product[];
